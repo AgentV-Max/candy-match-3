@@ -183,6 +183,93 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
+    z-index: 8;
+  }
+
+  .flash-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.4);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  .flash-overlay.flash {
+    animation: flash-fade 0.4s ease-out;
+  }
+
+  @keyframes flash-fade {
+    0%   { opacity: 0.75; }
+    100% { opacity: 0; }
+  }
+
+  .particles-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 6;
+  }
+
+  .particle {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    left: 0;
+    top: 0;
+    box-shadow: 0 0 4px rgba(255,255,255,0.5);
+    animation: particle-burst 0.6s ease-out forwards;
+  }
+
+  @keyframes particle-burst {
+    0% {
+      transform: translate(-50%, -50%) translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.2);
+      opacity: 0;
+    }
+  }
+
+  .board.shake {
+    animation: board-shake 0.4s ease;
+  }
+
+  @keyframes board-shake {
+    0%, 100% { transform: translate(0, 0); }
+    20% { transform: translate(-6px, 3px); }
+    40% { transform: translate(6px, -3px); }
+    60% { transform: translate(-4px, 2px); }
+    80% { transform: translate(4px, -2px); }
+  }
+
+  .combo-popup {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 3px 10px rgba(0,0,0,0.6), 0 0 22px rgba(255, 209, 102, 0.85);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+    white-space: nowrap;
+  }
+
+  .combo-popup.show {
+    animation: combo-pop 0.8s ease-out forwards;
+  }
+
+  @keyframes combo-pop {
+    0%   { opacity: 0; transform: translate(-50%, -30%) scale(0.4); }
+    20%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+    35%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    75%  { opacity: 1; transform: translate(-50%, -62%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -80%) scale(0.9); }
   }
 
   .overlay.show {
@@ -225,6 +312,9 @@
   <div id="message">&nbsp;</div>
 
   <div class="board" id="board">
+    <div class="flash-overlay" id="flash"></div>
+    <div class="particles-layer" id="particles"></div>
+    <div class="combo-popup" id="combo-popup"></div>
     <div class="overlay" id="overlay">
       <h2 id="overlay-title">Game Over</h2>
       <p id="overlay-text">Final Score: 0</p>
@@ -248,6 +338,12 @@
   const overlayTitleEl = document.getElementById('overlay-title');
   const overlayTextEl = document.getElementById('overlay-text');
   const resetBtn = document.getElementById('reset-btn');
+  const flashEl = document.getElementById('flash');
+  const particlesEl = document.getElementById('particles');
+  const comboPopupEl = document.getElementById('combo-popup');
+
+  const TYPE_COLORS = ['#ff6b81', '#2e86ff', '#21a84a', '#f5a623', '#9146ff'];
+  const COMBO_WORDS = ['', 'Sweet!', 'Great!', 'Awesome!', 'Fantastic!', 'Incredible!'];
 
   let grid = [];          // grid[row][col] = type index
   let cellEls = [];       // cellEls[row][col] = DOM element
@@ -260,6 +356,96 @@
 
   function randType() {
     return Math.floor(Math.random() * TYPES);
+  }
+
+  // --- Audio (Web Audio API, no external files) ---
+  let audioCtx = null;
+
+  function ensureAudio() {
+    if (!audioCtx) {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      audioCtx = new Ctx();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playTone({ freq = 440, duration = 0.15, type = 'sine', volume = 0.2, delay = 0 }) {
+    if (!audioCtx) return;
+    const t0 = audioCtx.currentTime + delay;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(volume, t0 + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration + 0.03);
+  }
+
+  function playSwapSound() {
+    playTone({ freq: 320, duration: 0.09, type: 'triangle', volume: 0.12 });
+  }
+
+  function playInvalidSound() {
+    playTone({ freq: 140, duration: 0.18, type: 'sawtooth', volume: 0.12 });
+  }
+
+  function playMatchSound(combo) {
+    const base = 440 * Math.pow(1.12, Math.min(combo - 1, 8));
+    playTone({ freq: base, duration: 0.16, type: 'sine', volume: 0.18 });
+    playTone({ freq: base * 1.5, duration: 0.16, type: 'sine', volume: 0.1, delay: 0.05 });
+  }
+
+  function playGameOverSound() {
+    [440, 349, 293, 220].forEach((f, i) => {
+      playTone({ freq: f, duration: 0.3, type: 'triangle', volume: 0.15, delay: i * 0.15 });
+    });
+  }
+
+  // --- Juice: particles, shake, flash, combo popups ---
+  function spawnParticles(r, c, typeIndex) {
+    const cellEl = cellEls[r][c];
+    const cx = cellEl.offsetLeft + cellEl.offsetWidth / 2;
+    const cy = cellEl.offsetTop + cellEl.offsetHeight / 2;
+    const color = TYPE_COLORS[typeIndex] || '#fff';
+    const count = 7;
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.6 - 0.3);
+      const dist = 26 + Math.random() * 22;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = cx + 'px';
+      p.style.top = cy + 'px';
+      p.style.background = color;
+      p.style.setProperty('--dx', dx + 'px');
+      p.style.setProperty('--dy', dy + 'px');
+      particlesEl.appendChild(p);
+      p.addEventListener('animationend', () => p.remove());
+    }
+  }
+
+  function triggerShake() {
+    boardEl.classList.remove('shake');
+    void boardEl.offsetWidth;
+    boardEl.classList.add('shake');
+  }
+
+  function triggerFlash() {
+    flashEl.classList.remove('flash');
+    void flashEl.offsetWidth;
+    flashEl.classList.add('flash');
+  }
+
+  function showComboPopupText(word) {
+    comboPopupEl.textContent = word;
+    comboPopupEl.classList.remove('show');
+    void comboPopupEl.offsetWidth;
+    comboPopupEl.classList.add('show');
   }
 
   function inBounds(r, c) {
@@ -421,6 +607,7 @@
         for (let c = 0; c < SIZE; c++) {
           if (matched[r][c]) {
             clearedThisPass++;
+            spawnParticles(r, c, grid[r][c]);
             cellEls[r][c].classList.add('matched');
           }
         }
@@ -429,6 +616,19 @@
       score += clearedThisPass * 10 * comboMultiplier;
       totalCleared += clearedThisPass;
       updateStats();
+      playMatchSound(comboMultiplier);
+
+      let popupWord = '';
+      if (comboMultiplier >= 2) {
+        popupWord = COMBO_WORDS[Math.min(comboMultiplier - 1, COMBO_WORDS.length - 1)];
+      } else if (clearedThisPass >= 5) {
+        popupWord = 'Nice!';
+      }
+      if (popupWord) {
+        showComboPopupText(popupWord);
+        triggerShake();
+        triggerFlash();
+      }
 
       await wait(320);
 
@@ -491,6 +691,7 @@
 
     swapGrid(a, b);
     renderAll();
+    playSwapSound();
     await wait(180);
 
     const { any } = findMatches();
@@ -499,6 +700,7 @@
       // revert
       swapGrid(a, b);
       renderAll();
+      playInvalidSound();
       showMessage('No match — try again!');
       await wait(180);
       busy = false;
@@ -530,6 +732,7 @@
     overlayTitleEl.textContent = 'Game Over';
     overlayTextEl.textContent = 'Final Score: ' + score;
     overlayEl.classList.add('show');
+    playGameOverSound();
   }
 
   function handleCellActivate(r, c) {
@@ -630,6 +833,7 @@
   }
 
   resetBtn.addEventListener('click', newGame);
+  document.addEventListener('pointerdown', ensureAudio, { once: true });
 
   newGame();
 })();
