@@ -66,9 +66,28 @@
   .stat-box .value {
     font-size: 1.4rem;
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
   }
 
-  #reset-btn {
+  .coin-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #reset-btn, #shop-btn {
     background: linear-gradient(135deg, #ff7ab6, #7a5cff);
     border: none;
     color: white;
@@ -81,13 +100,95 @@
     transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
 
-  #reset-btn:hover {
+  #shop-btn {
+    background: linear-gradient(135deg, #ffd166, #f5a623);
+    box-shadow: 0 4px 14px rgba(245, 166, 35, 0.5);
+    color: #3a2600;
+  }
+
+  #reset-btn:hover, #shop-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(122, 92, 255, 0.65);
   }
 
-  #reset-btn:active {
+  #reset-btn:active, #shop-btn:active {
     transform: translateY(0);
+  }
+
+  #reset-all-btn {
+    background: none;
+    border: none;
+    color: rgba(244, 240, 255, 0.55);
+    font-size: 0.75rem;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 2px;
+  }
+
+  #reset-all-btn:hover {
+    color: rgba(244, 240, 255, 0.85);
+  }
+
+  .main-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .money-meter {
+    position: relative;
+    width: 62px;
+    height: calc(var(--cell) * 8 + var(--gap) * 7 + 20px);
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.25);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.4);
+    flex-shrink: 0;
+  }
+
+  .money-meter-fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 0%;
+    background-image: url('assets/note-fill.jpg');
+    background-size: 100% auto;
+    background-repeat: repeat-y;
+    background-position: bottom;
+    transition: height 0.6s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+
+  .money-meter-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0) 0%, rgba(255, 215, 100, 0.25) 100%);
+  }
+
+  .money-meter-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.85);
+    z-index: 2;
+    padding: 4px;
+    text-align: center;
+  }
+
+  .money-meter-label small {
+    font-size: 0.6rem;
+    opacity: 0.85;
+    font-weight: 600;
   }
 
   #message {
@@ -287,9 +388,162 @@
     opacity: 0.85;
   }
 
-  @media (max-width: 520px) {
+  .shop-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 5, 16, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    padding: 16px;
+  }
+
+  .shop-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .shop-panel {
+    background: linear-gradient(160deg, #3a2d5c, #201735);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+    padding: 20px;
+    width: 100%;
+    max-width: 380px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  }
+
+  .shop-panel h2 {
+    margin: 0 0 4px;
+    font-size: 1.3rem;
+    text-align: center;
+  }
+
+  .shop-balance {
+    text-align: center;
+    margin: 0 0 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: #ffd166;
+  }
+
+  .shop-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+
+  .shop-item-icon {
+    font-size: 1.6rem;
+    width: 34px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .shop-item-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .shop-item-info strong {
+    display: block;
+    font-size: 0.9rem;
+  }
+
+  .shop-item-info span {
+    display: block;
+    font-size: 0.72rem;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+
+  .buy-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, #ffd166, #f5a623);
+    border: none;
+    color: #3a2600;
+    font-weight: 800;
+    padding: 8px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+
+  .buy-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .buy-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  #shop-close {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-weight: 700;
+    padding: 10px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .naira-chart-banner {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .overlay-btn {
+    background: linear-gradient(135deg, #ffd166, #f5a623);
+    border: none;
+    color: #3a2600;
+    font-weight: 800;
+    padding: 10px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 560px) {
     :root { --cell: 38px; --gap: 4px; }
     h1 { font-size: 1.3rem; }
+    .money-meter { width: 46px; }
+    .money-meter-label { font-size: 0.6rem; }
+    .money-meter-label small { font-size: 0.5rem; }
+    .coin-icon { width: 16px; height: 16px; }
+  }
+
+  @media (max-width: 400px) {
+    :root { --cell: 32px; --gap: 3px; }
+    body { padding: 12px; }
+    .main-row { gap: 8px; }
+    .money-meter { width: 36px; }
+    .money-meter-label { font-size: 0.52rem; padding: 2px; }
+    .money-meter-label small { font-size: 0.42rem; }
   }
 </style>
 </head>
@@ -300,59 +554,167 @@
 
   <div class="stats">
     <div class="stat-box">
-      <div class="label">Score</div>
-      <div class="value" id="score">0</div>
+      <div class="label">Level</div>
+      <div class="value" id="level">1</div>
+    </div>
+    <div class="stat-box">
+      <div class="label">Naira Coins</div>
+      <div class="value"><img class="coin-icon" src="assets/coin.png" alt=""><span id="coins">0</span></div>
     </div>
     <div class="stat-box">
       <div class="label">Moves Left</div>
-      <div class="value" id="moves">30</div>
+      <div class="value" id="moves">25</div>
     </div>
   </div>
 
   <div id="message">&nbsp;</div>
 
-  <div class="board" id="board">
-    <div class="flash-overlay" id="flash"></div>
-    <div class="particles-layer" id="particles"></div>
-    <div class="combo-popup" id="combo-popup"></div>
-    <div class="overlay" id="overlay">
-      <h2 id="overlay-title">Game Over</h2>
-      <p id="overlay-text">Final Score: 0</p>
+  <div class="main-row">
+    <div class="money-meter" id="money-meter">
+      <div class="money-meter-fill" id="money-fill"></div>
+      <div class="money-meter-label">
+        <span id="score">0</span>
+        <small>of <span id="target">300</span></small>
+      </div>
+    </div>
+
+    <div class="board" id="board">
+      <div class="flash-overlay" id="flash"></div>
+      <div class="particles-layer" id="particles"></div>
+      <div class="combo-popup" id="combo-popup"></div>
+      <div class="overlay" id="overlay">
+        <h2 id="overlay-title">Game Over</h2>
+        <p id="overlay-text">Final Score: 0</p>
+        <button id="overlay-next-btn" class="overlay-btn">Next Level →</button>
+      </div>
     </div>
   </div>
 
-  <button id="reset-btn">Reset Game</button>
+  <div class="action-row">
+    <button id="shop-btn">🛒 Shop</button>
+    <button id="reset-btn">Restart Level</button>
+  </div>
+  <button id="reset-all-btn">Reset all progress</button>
+</div>
+
+<div class="shop-overlay" id="shop-overlay">
+  <div class="shop-panel">
+    <h2>🛒 Naira Shop</h2>
+    <img class="naira-chart-banner" src="assets/naira-chart.jpg" alt="Nigerian currency">
+    <p class="shop-balance"><img class="coin-icon" src="assets/coin.png" alt="">Balance: <span id="shop-balance">0</span></p>
+
+    <div class="shop-item">
+      <div class="shop-item-icon">➕</div>
+      <div class="shop-item-info">
+        <strong>+5 Extra Moves</strong>
+        <span>Adds 5 more moves right now</span>
+      </div>
+      <button class="buy-btn" data-item="moves"><img class="coin-icon" src="assets/coin.png" alt="">15</button>
+    </div>
+
+    <div class="shop-item">
+      <div class="shop-item-icon">💥</div>
+      <div class="shop-item-info">
+        <strong>Color Bomb</strong>
+        <span>Clears every candy of one type you tap</span>
+      </div>
+      <button class="buy-btn" data-item="colorbomb"><img class="coin-icon" src="assets/coin.png" alt="">30</button>
+    </div>
+
+    <div class="shop-item">
+      <div class="shop-item-icon">🔀</div>
+      <div class="shop-item-info">
+        <strong>Shuffle Board</strong>
+        <span>Rearranges the board with a fresh move</span>
+      </div>
+      <button class="buy-btn" data-item="shuffle"><img class="coin-icon" src="assets/coin.png" alt="">10</button>
+    </div>
+
+    <div class="shop-item">
+      <div class="shop-item-icon">🔨</div>
+      <div class="shop-item-info">
+        <strong>Hammer</strong>
+        <span>Removes any one candy you tap</span>
+      </div>
+      <button class="buy-btn" data-item="hammer"><img class="coin-icon" src="assets/coin.png" alt="">20</button>
+    </div>
+
+    <button id="shop-close">Close</button>
+  </div>
 </div>
 
 <script>
 (function () {
   const SIZE = 8;
   const TYPES = 5;
-  const START_MOVES = 30;
+  const MOVES_PER_LEVEL = 25;
+  const STATE_KEY = 'candyMatch3State';
 
   const boardEl = document.getElementById('board');
   const scoreEl = document.getElementById('score');
+  const targetEl = document.getElementById('target');
   const movesEl = document.getElementById('moves');
+  const levelEl = document.getElementById('level');
+  const coinsEl = document.getElementById('coins');
+  const shopBalanceEl = document.getElementById('shop-balance');
+  const moneyFillEl = document.getElementById('money-fill');
   const messageEl = document.getElementById('message');
   const overlayEl = document.getElementById('overlay');
   const overlayTitleEl = document.getElementById('overlay-title');
   const overlayTextEl = document.getElementById('overlay-text');
+  const overlayNextBtn = document.getElementById('overlay-next-btn');
   const resetBtn = document.getElementById('reset-btn');
+  const resetAllBtn = document.getElementById('reset-all-btn');
   const flashEl = document.getElementById('flash');
   const particlesEl = document.getElementById('particles');
   const comboPopupEl = document.getElementById('combo-popup');
+  const shopBtn = document.getElementById('shop-btn');
+  const shopOverlayEl = document.getElementById('shop-overlay');
+  const shopCloseBtn = document.getElementById('shop-close');
 
   const TYPE_COLORS = ['#ff6b81', '#2e86ff', '#21a84a', '#f5a623', '#9146ff'];
   const COMBO_WORDS = ['', 'Sweet!', 'Great!', 'Awesome!', 'Fantastic!', 'Incredible!'];
 
+  const SHOP_ITEMS = {
+    moves:     { cost: 15 },
+    colorbomb: { cost: 30 },
+    shuffle:   { cost: 10 },
+    hammer:    { cost: 20 },
+  };
+
   let grid = [];          // grid[row][col] = type index
   let cellEls = [];       // cellEls[row][col] = DOM element
-  let score = 0;
-  let movesLeft = START_MOVES;
+  let score = 0;          // score within the current level
+  let target = 300;       // score needed to clear the current level
+  let level = 1;
+  let coins = 0;          // persistent Naira Coins wallet
+  let movesLeft = MOVES_PER_LEVEL;
   let selected = null;    // {row, col}
   let dragStart = null;   // {row, col}
   let busy = false;       // true while animations / resolving matches
   let gameOver = false;
+  let armedPowerUp = null; // null | 'colorbomb' | 'hammer'
+
+  function levelTarget(lv) {
+    return 300 + (lv - 1) * 250;
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STATE_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (Number.isFinite(s.coins)) coins = s.coins;
+        if (Number.isFinite(s.level) && s.level >= 1) level = s.level;
+      }
+    } catch (e) { /* ignore corrupt/blocked storage */ }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STATE_KEY, JSON.stringify({ coins, level }));
+    } catch (e) { /* ignore blocked storage (private mode, etc.) */ }
+  }
 
   function randType() {
     return Math.floor(Math.random() * TYPES);
@@ -399,10 +761,21 @@
     playTone({ freq: base * 1.5, duration: 0.16, type: 'sine', volume: 0.1, delay: 0.05 });
   }
 
-  function playGameOverSound() {
+  function playLoseSound() {
     [440, 349, 293, 220].forEach((f, i) => {
       playTone({ freq: f, duration: 0.3, type: 'triangle', volume: 0.15, delay: i * 0.15 });
     });
+  }
+
+  function playWinSound() {
+    [392, 494, 587, 784].forEach((f, i) => {
+      playTone({ freq: f, duration: 0.22, type: 'triangle', volume: 0.16, delay: i * 0.12 });
+    });
+  }
+
+  function playCoinSound() {
+    playTone({ freq: 880, duration: 0.08, type: 'square', volume: 0.1 });
+    playTone({ freq: 1320, duration: 0.1, type: 'square', volume: 0.08, delay: 0.06 });
   }
 
   // --- Juice: particles, shake, flash, combo popups ---
@@ -670,7 +1043,13 @@
 
   function updateStats() {
     scoreEl.textContent = score;
+    targetEl.textContent = target;
     movesEl.textContent = Math.max(0, movesLeft);
+    levelEl.textContent = level;
+    coinsEl.textContent = coins;
+    shopBalanceEl.textContent = coins;
+    const pct = Math.max(0, Math.min(100, (score / target) * 100));
+    moneyFillEl.style.height = pct + '%';
   }
 
   function showMessage(text) {
@@ -713,30 +1092,189 @@
     await clearMatchesLoop();
 
     busy = false;
-
-    if (movesLeft <= 0) {
-      endGame();
-    } else if (!hasAnyPossibleMove()) {
-      showMessage('No moves left — reshuffling!');
-      reshuffleBoard();
-    }
+    checkLevelEnd();
   }
 
-  function reshuffleBoard() {
-    grid = createGridNoMatches();
+  function reshuffleBoardGuaranteed() {
+    let attempts = 0;
+    do {
+      grid = createGridNoMatches();
+      attempts++;
+    } while (!hasAnyPossibleMove() && attempts < 50);
     renderAll();
   }
 
-  function endGame() {
+  function checkLevelEnd() {
+    if (score >= target) {
+      winLevel();
+    } else if (movesLeft <= 0) {
+      loseLevel();
+    } else if (!hasAnyPossibleMove()) {
+      showMessage('No moves left — reshuffling!');
+      reshuffleBoardGuaranteed();
+    }
+  }
+
+  function awardCoinsForLevel() {
+    const earned = Math.floor(score / 20);
+    coins += earned;
+    saveState();
+    return earned;
+  }
+
+  function winLevel() {
     gameOver = true;
-    overlayTitleEl.textContent = 'Game Over';
-    overlayTextEl.textContent = 'Final Score: ' + score;
+    const earned = awardCoinsForLevel();
+    updateStats();
+    overlayTitleEl.textContent = 'Level Complete! 🎉';
+    overlayTextEl.innerHTML = 'Score: ' + score + ' / ' + target + '<br>+' + earned + ' Naira Coins earned!';
+    overlayNextBtn.textContent = 'Next Level →';
+    overlayNextBtn.onclick = () => startLevel(level + 1);
     overlayEl.classList.add('show');
-    playGameOverSound();
+    playWinSound();
+  }
+
+  function loseLevel() {
+    gameOver = true;
+    const earned = awardCoinsForLevel();
+    updateStats();
+    overlayTitleEl.textContent = 'Out of Moves';
+    overlayTextEl.innerHTML = 'Score: ' + score + ' / ' + target + '<br>+' + earned + ' Naira Coins earned. Try again!';
+    overlayNextBtn.textContent = 'Retry Level';
+    overlayNextBtn.onclick = () => startLevel(level);
+    overlayEl.classList.add('show');
+    playLoseSound();
+  }
+
+  // --- Power-ups ---
+  async function useHammer(r, c) {
+    armedPowerUp = null;
+    updateArmedMessage();
+    if (busy || gameOver) return;
+    if (grid[r][c] === null || grid[r][c] === undefined) return;
+
+    busy = true;
+    spawnParticles(r, c, grid[r][c]);
+    cellEls[r][c].classList.add('matched');
+    playTone({ freq: 180, duration: 0.15, type: 'square', volume: 0.15 });
+    await wait(280);
+
+    grid[r][c] = null;
+    applyGravityAndRefill();
+    renderAll();
+    await wait(240);
+
+    await clearMatchesLoop();
+    busy = false;
+    checkLevelEnd();
+  }
+
+  async function useColorBomb(r, c) {
+    armedPowerUp = null;
+    updateArmedMessage();
+    if (busy || gameOver) return;
+    const targetType = grid[r][c];
+    if (targetType === null || targetType === undefined) return;
+
+    busy = true;
+    let cleared = 0;
+    for (let rr = 0; rr < SIZE; rr++) {
+      for (let cc = 0; cc < SIZE; cc++) {
+        if (grid[rr][cc] === targetType) {
+          cleared++;
+          spawnParticles(rr, cc, targetType);
+          cellEls[rr][cc].classList.add('matched');
+        }
+      }
+    }
+
+    score += cleared * 10;
+    updateStats();
+    playMatchSound(2);
+    triggerShake();
+    triggerFlash();
+    showComboPopupText('Boom!');
+    await wait(340);
+
+    for (let rr = 0; rr < SIZE; rr++) {
+      for (let cc = 0; cc < SIZE; cc++) {
+        if (grid[rr][cc] === targetType) grid[rr][cc] = null;
+      }
+    }
+    applyGravityAndRefill();
+    renderAll();
+    await wait(260);
+
+    await clearMatchesLoop();
+    busy = false;
+    checkLevelEnd();
+  }
+
+  function updateArmedMessage() {
+    if (armedPowerUp === 'colorbomb') {
+      showMessage('Tap any candy to Color-Bomb its type!');
+    } else if (armedPowerUp === 'hammer') {
+      showMessage('Tap a candy to smash it!');
+    }
+  }
+
+  // --- Shop ---
+  function openShop() {
+    updateStats();
+    shopOverlayEl.classList.add('show');
+  }
+
+  function closeShop() {
+    shopOverlayEl.classList.remove('show');
+  }
+
+  function buyItem(key) {
+    const item = SHOP_ITEMS[key];
+    if (!item || gameOver) return;
+    if (coins < item.cost) {
+      showMessage('Not enough Naira Coins!');
+      return;
+    }
+
+    coins -= item.cost;
+    saveState();
+    playCoinSound();
+
+    if (key === 'moves') {
+      movesLeft += 5;
+      updateStats();
+      showMessage('+5 moves added!');
+      closeShop();
+    } else if (key === 'shuffle') {
+      reshuffleBoardGuaranteed();
+      updateStats();
+      showMessage('Board shuffled!');
+      closeShop();
+    } else if (key === 'colorbomb') {
+      armedPowerUp = 'colorbomb';
+      updateStats();
+      closeShop();
+      updateArmedMessage();
+    } else if (key === 'hammer') {
+      armedPowerUp = 'hammer';
+      updateStats();
+      closeShop();
+      updateArmedMessage();
+    }
   }
 
   function handleCellActivate(r, c) {
     if (busy || gameOver) return;
+
+    if (armedPowerUp === 'hammer') {
+      useHammer(r, c);
+      return;
+    }
+    if (armedPowerUp === 'colorbomb') {
+      useColorBomb(r, c);
+      return;
+    }
+
     const clicked = { row: r, col: c };
 
     if (!selected) {
@@ -769,7 +1307,7 @@
     });
 
     el.addEventListener('mousedown', (e) => {
-      if (busy || gameOver) return;
+      if (busy || gameOver || armedPowerUp) { dragStart = null; return; }
       dragStart = { row: parseInt(el.dataset.row, 10), col: parseInt(el.dataset.col, 10) };
     });
 
@@ -777,12 +1315,12 @@
       if (!dragStart || busy || gameOver) { dragStart = null; return; }
       const r = parseInt(el.dataset.row, 10);
       const c = parseInt(el.dataset.col, 10);
-      const target = { row: r, col: c };
-      if (dragStart.row !== target.row || dragStart.col !== target.col) {
-        if (areAdjacent(dragStart, target)) {
+      const targetCell = { row: r, col: c };
+      if (dragStart.row !== targetCell.row || dragStart.col !== targetCell.col) {
+        if (areAdjacent(dragStart, targetCell)) {
           selected = null;
           setSelectedVisual();
-          attemptSwap(dragStart, target);
+          attemptSwap(dragStart, targetCell);
         }
       }
       dragStart = null;
@@ -790,7 +1328,7 @@
 
     // touch support
     el.addEventListener('touchstart', (e) => {
-      if (busy || gameOver) return;
+      if (busy || gameOver || armedPowerUp) { dragStart = null; return; }
       dragStart = { row: parseInt(el.dataset.row, 10), col: parseInt(el.dataset.col, 10) };
     }, { passive: true });
 
@@ -799,43 +1337,57 @@
       const touch = e.changedTouches[0];
       const domEl = document.elementFromPoint(touch.clientX, touch.clientY);
       if (domEl && domEl.classList.contains('cell')) {
-        const target = { row: parseInt(domEl.dataset.row, 10), col: parseInt(domEl.dataset.col, 10) };
-        if (areAdjacent(dragStart, target)) {
+        const targetCell = { row: parseInt(domEl.dataset.row, 10), col: parseInt(domEl.dataset.col, 10) };
+        if (areAdjacent(dragStart, targetCell)) {
           selected = null;
           setSelectedVisual();
-          attemptSwap(dragStart, target);
+          attemptSwap(dragStart, targetCell);
         }
       }
       dragStart = null;
     });
   }
 
-  async function initialCleanup() {
-    // In case createGridNoMatches ever left a match (it shouldn't), clear it.
-    const { any } = findMatches();
-    if (any) {
-      await clearMatchesLoop();
-    }
-  }
-
-  function newGame() {
+  function startLevel(lv) {
+    level = Math.max(1, lv);
+    target = levelTarget(level);
     score = 0;
-    movesLeft = START_MOVES;
+    movesLeft = MOVES_PER_LEVEL;
     selected = null;
     dragStart = null;
     busy = false;
     gameOver = false;
+    armedPowerUp = null;
     overlayEl.classList.remove('show');
     messageEl.textContent = ' ';
     grid = createGridNoMatches();
     buildBoardDom();
     updateStats();
+    saveState();
   }
 
-  resetBtn.addEventListener('click', newGame);
+  function resetAllProgress() {
+    if (!confirm('Reset your level and all Naira Coins back to the start?')) return;
+    level = 1;
+    coins = 0;
+    saveState();
+    startLevel(1);
+  }
+
+  resetBtn.addEventListener('click', () => startLevel(level));
+  resetAllBtn.addEventListener('click', resetAllProgress);
+  shopBtn.addEventListener('click', openShop);
+  shopCloseBtn.addEventListener('click', closeShop);
+  shopOverlayEl.addEventListener('click', (e) => {
+    if (e.target === shopOverlayEl) closeShop();
+  });
+  shopOverlayEl.querySelectorAll('.buy-btn').forEach((btn) => {
+    btn.addEventListener('click', () => buyItem(btn.dataset.item));
+  });
   document.addEventListener('pointerdown', ensureAudio, { once: true });
 
-  newGame();
+  loadState();
+  startLevel(level);
 })();
 </script>
 
