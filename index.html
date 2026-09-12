@@ -1095,12 +1095,16 @@
     checkLevelEnd();
   }
 
-  function reshuffleBoardGuaranteed() {
+  function assignPlayableGrid() {
     let attempts = 0;
     do {
       grid = createGridNoMatches();
       attempts++;
     } while (!hasAnyPossibleMove() && attempts < 50);
+  }
+
+  function reshuffleBoardGuaranteed() {
+    assignPlayableGrid();
     renderAll();
   }
 
@@ -1231,6 +1235,10 @@
   function buyItem(key) {
     const item = SHOP_ITEMS[key];
     if (!item || gameOver) return;
+    if (busy) {
+      showMessage('Wait for the board to settle first!');
+      return;
+    }
     if (coins < item.cost) {
       showMessage('Not enough Naira Coins!');
       return;
@@ -1360,7 +1368,7 @@
     armedPowerUp = null;
     overlayEl.classList.remove('show');
     messageEl.textContent = ' ';
-    grid = createGridNoMatches();
+    assignPlayableGrid();
     buildBoardDom();
     updateStats();
     saveState();
